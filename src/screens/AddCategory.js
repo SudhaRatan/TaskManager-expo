@@ -11,8 +11,7 @@ import {
   StatusBar,
   StyleSheet,
 } from 'react-native';
-import Modal from 'react-native-modal';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { insertCategory } from '../db-functions/db';
 import { Entypo } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,14 +21,13 @@ import SelectIcons from '../components/selectIcons';
 const AddCategory = () => {
   // console.log(iconNames)
   const [name, setName] = useState(null)
-  const [modal, setModal] = useState(false)
+  const [iconColor, setIconColor] = useState("#3067C0")
+  const [iconName, setIconName] = useState("home")
   const { width, height } = Dimensions.get('window')
   const navigation = useNavigation()
   const [toggle, setToggle] = useState(false)
   const [toggle1, setToggle1] = useState(false)
   const scale = useRef(new Animated.Value(0)).current
-  const [iconColor, setIconColor] = useState("#3067C0")
-  const [iconName, setIconName] = useState("home")
   const iconContScale = useRef(new Animated.Value(0)).current
 
   const iconAnimation = () => {
@@ -68,6 +66,7 @@ const AddCategory = () => {
       toValue: 0,
       useNativeDriver: true
     }).start()
+    setToggle1(!toggle1)
   }
 
   return (
@@ -91,7 +90,7 @@ const AddCategory = () => {
             value={name}
             onChangeText={(value) => {
               setName(value)
-              console.log(value)
+              console.log(name)
             }}
           />
           <View style={St.selectCont}>
@@ -175,7 +174,7 @@ const AddCategory = () => {
                     outputRange: [width, 0]
                   })
                 }
-              ]
+              ],
             },
           ]}>
             <SelectIcons setIcon={setIcon} />
@@ -185,13 +184,28 @@ const AddCategory = () => {
       <View style={[
         St.AddCategory,
         {
-          // width: width * 0.4,
-          right: width-(width*0.9),
+          right: width - (width * 0.9),
+          bottom: width - (width * 0.9),
         }
       ]}>
-        <TouchableOpacity activeOpacity={0.5} style={St.addCatButton}>
-          <Text style={St.addCatButtonText}>Add Category</Text>
-        </TouchableOpacity>
+        <Animated.View style={{
+          transform: [
+            {
+              translateY: iconContScale.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, width]
+              })
+            }
+          ],
+        }}>
+          <TouchableOpacity 
+          activeOpacity={0.5} 
+          style={St.addCatButton}
+          onPress={() => {}}
+          >
+            <Text style={St.addCatButtonText}>Add Category</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </View>
     </View>
   )

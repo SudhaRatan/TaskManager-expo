@@ -85,6 +85,7 @@ const TaskCard = ({ task, checked, id, handleDelete, color }) => {
         <Pressable
           onPressIn={() => pressInOut(0.94)}
           onPressOut={() => pressInOut(1)}
+          onPress={handleCheck}
         >
           <Animated.View style={[
             {
