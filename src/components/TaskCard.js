@@ -6,18 +6,21 @@ import {
   Pressable,
   StyleSheet,
 } from 'react-native';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Swipeable } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { AnimatePresence } from 'moti';
 import CheckBox from './checkBox';
 import CheckBox1 from './checkBox1';
+import { getCategoryColor } from '../db-functions/db';
+import { handleCheck as hc } from '../db-functions/db';
 
-const TaskCard = ({ task, checked, id, handleDelete, color }) => {
+const TaskCard = ({ name, checked, _id, handleDelete, categoryId, changeState }) => {
   const { width, height } = Dimensions.get('window')
   const addButtonHeight = Math.floor(width < height ? height * 0.075 : width * 0.075)
   const [check, setCheck] = useState(checked)
+  const [color,setColor] = useState(null)
 
   const pressInOut = (val) => {
     Animated.spring(scale1, {
@@ -28,8 +31,18 @@ const TaskCard = ({ task, checked, id, handleDelete, color }) => {
   const scale1 = useRef(new Animated.Value(1)).current
 
   const handleCheck = () => {
+    hc(_id,check)
     setCheck(!check)
+    changeState()
   }
+
+  const getColor = async () => {
+    setColor(await getCategoryColor(categoryId))
+  }
+
+  useEffect(() => {
+    getColor()
+  }, []);
 
   const leftSwipe = (progress, dragX) => {
     const scale = dragX.interpolate({
@@ -72,7 +85,9 @@ const TaskCard = ({ task, checked, id, handleDelete, color }) => {
           St.swipeContainer
         ]}
       >
-        <Pressable onPress={() => handleDelete(id)}>
+        <Pressable
+          onPress={() => handleDelete(_id)}
+        >
           <MaterialCommunityIcons name="delete" size={50} color="white" />
         </Pressable>
       </Animated.View>
@@ -83,7 +98,7 @@ const TaskCard = ({ task, checked, id, handleDelete, color }) => {
     <View>
       <Swipeable renderLeftActions={leftSwipe} renderRightActions={rightSwipe}>
         <Pressable
-          onPressIn={() => pressInOut(0.94)}
+          onPressIn={() => pressInOut(0.92)}
           onPressOut={() => pressInOut(1)}
           onPress={handleCheck}
         >
@@ -91,8 +106,7 @@ const TaskCard = ({ task, checked, id, handleDelete, color }) => {
             {
               width: width - 40,
               transform: [{ scale: scale1 }],
-              // width:addButtonHeight,
-            height:addButtonHeight,
+              height: addButtonHeight,
             },
             St.taskContainer
           ]}>
@@ -107,7 +121,7 @@ const TaskCard = ({ task, checked, id, handleDelete, color }) => {
               },
               St.taskText
             ]}>
-              {task}
+              {name}
             </Text>
           </Animated.View>
         </Pressable>

@@ -10,6 +10,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import Home from '../screens/Home';
 import MyDrawer from '../components/MyDrawer';
 import AddCategory from '../screens/AddCategory';
+import AddTask from '../screens/AddTask';
 
 const MainStack = createStackNavigator();
 const MainDrawerNavig = createDrawerNavigator();
@@ -48,6 +49,7 @@ const MainNavigation = () => {
       }}>
         <MainStack.Screen name="Main" component={MainDrawer} />
         <MainStack.Screen name="AddCategory" component={AddCategory} />
+        <MainStack.Screen name="AddTask" component={AddTask} />
       </MainStack.Navigator>
     </NavigationContainer>
   )

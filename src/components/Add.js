@@ -59,12 +59,17 @@ const Add = () => {
     navigation.navigate('AddCategory')
   }
 
+  const addTask = () => {
+    handlePress()
+    navigation.navigate('AddTask')
+  }
+
   return (
     <View style={St.container}>
 
       {/* Add task button */}
       <TouchableWithoutFeedback
-        onPress={addCategory}
+        onPress={addTask}
       >
         <Animated.View style={[
           St.taskButton,
@@ -88,7 +93,7 @@ const Add = () => {
               {
                 translateX: translateY.interpolate({
                   inputRange: [0, addButtonHeight / 3, addButtonHeight],
-                  outputRange: [0, addButtonHeight*1.2, -addButtonHeight * 0.9 / 2]
+                  outputRange: [0, addButtonHeight*1.2, -addButtonHeight * 0.4]
                 })
               }
             ]
@@ -106,7 +111,7 @@ const Add = () => {
         <Animated.View style={[
           St.taskButton,
           {
-            width: addButtonHeight * 2.4,
+            width: addButtonHeight * 2.2,
             height: addButtonHeight * 0.9,
             borderRadius: addButtonHeight / 2,
             transform: [
@@ -125,7 +130,7 @@ const Add = () => {
               {
                 translateX: translateY.interpolate({
                   inputRange: [0, addButtonHeight / 3, addButtonHeight],
-                  outputRange: [0, -addButtonHeight*1.2, -addButtonHeight * 2.4 / 4]
+                  outputRange: [0, -addButtonHeight*1.2, -addButtonHeight * 0.6]
                 })
               }
             ]
@@ -191,7 +196,7 @@ const St = StyleSheet.create({
     elevation:2,
   },
   taskButtonText: {
-    fontSize: 16,
+    // fontSize: 16,
     color: '#F9FAFE',
   }
 })

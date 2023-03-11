@@ -6,25 +6,55 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useDrawerStatus } from '@react-navigation/drawer';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Header from '../components/Header';
 import CategoryCard from '../components/CategoryCard';
 import { FlatList } from 'react-native-gesture-handler';
 import TaskCard from '../components/TaskCard';
 import { AnimatePresence, MotiView } from 'moti';
-import { categories, tasks } from '../data/data';
-import { insertCategory } from '../db-functions/db';
+import { getCategories } from '../db-functions/db';
 import Add from '../components/Add';
+import { useFocusEffect } from '@react-navigation/native';
+import { ActivityIndicator } from 'react-native';
+import { deleteCategory, tt, deleteTask } from '../db-functions/db';
+import { ToastAndroid } from 'react-native';
 
 const Home = ({ navigation }) => {
 
-  const [task, setTasks] = useState(tasks)
+  const [tasks, setTasks] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [loadingTasks, setLoadingTasks] = useState(true)
+  const [categories, setCategories] = useState(null)
+  const [change,setChange] = useState(false)
+
+  const changeState = () => {
+    setChange(!change)
+  }
+
+  const getCategoriesFunc = async () => {
+    const res = await getCategories()
+    if (res.stat) setCategories(res.res)
+    else setCategories(null)
+    setLoading(false)
+  }
+
+  const getLatestTasks = async () => {
+    tt.find({}).sort({ Date: -1 }).limit(10).exec((err, res) => {
+      if (res.length > 0) setTasks(res)
+      setLoadingTasks(false)
+    })
+  }
 
   const isDrawerOpen = useDrawerStatus() === 'open';
 
   useEffect(() => {
     drawerAnim();
-  }, [isDrawerOpen])
+  }, [isDrawerOpen]);
+
+  useFocusEffect(useCallback(() => {
+    getCategoriesFunc();
+    getLatestTasks();
+  }, []))
 
   const drawerAnim = () => {
     if (!isDrawerOpen) {
@@ -53,14 +83,24 @@ const Home = ({ navigation }) => {
 
   const scale = useRef(new Animated.Value(1)).current
 
-  const { height } = Dimensions.get('window')
+  const { height, width } = Dimensions.get('window')
 
-  const handleDelete = (id) => {
-    setTasks(task.filter(task => task.id !== id))
+  const handleDelete = async (_id) => {
+    const res = await deleteTask(_id)
+    if (res.stat) {
+      changeState()
+      setTasks(tasks.filter(task => task._id !== _id))
+    } else { ToastAndroid("Error occured", 1000) }
+  }
+
+  const deleteCategoryById = async (id) => {
+    await deleteCategory(id)
+    getCategoriesFunc();
+    getLatestTasks();
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#111E53', height: height, overflow: 'hidden' }} >
+    <View style={{ flex: 1, backgroundColor: '#111E53', height: height, }} >
       <Animated.ScrollView
         stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
@@ -72,7 +112,9 @@ const Home = ({ navigation }) => {
           }),
         }]}>
         <Header handleClick={handleToggle} />
-        <View style={St.container}>
+        <View style={[
+          St.container,
+        ]}>
           {/* Greeting */}
           <View>
             <Text style={St.greeting}>What's up, Rohit!</Text>
@@ -81,45 +123,76 @@ const Home = ({ navigation }) => {
           <View
             style={St.categoriesContainer}>
             <Text style={St.categoriesText}>CATEGORIES</Text>
-            <View style={St.catListCont}>
-              <FlatList
-                showsHorizontalScrollIndicator={false}
-                horizontal
-                keyExtractor={item => item.id}
-                data={categories}
-                renderItem={({ item }) => {
-                  return (
-                    <CategoryCard {...item} />
-                  )
-                }}
-              />
+            <View style={[
+              St.catListCont,
+              { width: width - 40 }
+            ]}>
+              {
+                loading
+                  ?
+                  <View style={St.loadingSt}>
+                    <ActivityIndicator size="large" />
+                  </View>
+                  :
+                  categories
+                    ?
+                    <FlatList
+                      showsHorizontalScrollIndicator={false}
+                      horizontal
+                      keyExtractor={item => item._id}
+                      data={categories}
+                      renderItem={({ item }) => {
+                        return (
+                          <CategoryCard {...item} deleteCategory={deleteCategoryById} change={change} />
+                        )
+                      }}
+                    />
+                    :
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                      <Text style={St.categoriesText}>Add Categories to display here</Text>
+                    </View>
+              }
+
             </View>
           </View>
           {/* Todays tasks */}
           <View
-            style={St.taskContainer}>
-            <Text style={St.taskText}>TODAY'S TASKS</Text>
+            style={[St.taskContainer, { width: width - 40 }]}>
+            <Text style={St.taskText}>RECENTLY ADDED TASKS</Text>
             <View>
               {
-                task.map((item, index) => {
-                  return (
-                    <AnimatePresence key={item.id}>
-                      <MotiView
-                        from={{
-                          translateY: -50
-                        }}
-                        animate={{
-                          translateY: 0
-                        }}
-                        transition={{
-                          delay: 50 * index
-                        }}
-                      >
-                        <TaskCard handleDelete={handleDelete} {...item} />
-                      </MotiView>
-                    </AnimatePresence>
-                  )
-                })
+                loadingTasks
+                  ?
+                  <View style={St.loadingSt}>
+                    <ActivityIndicator size="large" />
+                  </View>
+                  :
+                  tasks
+                    ?
+                    tasks.map((item, index) => {
+                      return (
+                        <AnimatePresence key={item._id}>
+                          <MotiView
+                            from={{
+                              translateX: -30
+                            }}
+                            animate={{
+                              translateX: 0
+                            }}
+                            transition={{
+                              delay: 100 * index,
+                              type: 'spring'
+                            }}
+                          >
+                            <TaskCard handleDelete={handleDelete} {...item} change={change} changeState={changeState} />
+                          </MotiView>
+                        </AnimatePresence>
+                      )
+                    })
+                    :
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop:50 }}>
+                      <Text style={St.categoriesText}>Add Tasks to display here</Text>
+                    </View>
               }
             </View>
           </View>
@@ -140,8 +213,7 @@ const St = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
-    paddingRight: 20,
-    paddingLeft: 20,
+    paddingHorizontal: 20,
   },
   greeting: {
     fontSize: 34,
@@ -154,20 +226,25 @@ const St = StyleSheet.create({
   },
   categoriesText: {
     fontSize: 16,
-    fontWeight: 500,
+    fontWeight: 600,
     marginBottom: 10,
     color: '#C5C5D2'
   },
   catListCont: {
-    height: 150
+    height: 150,
   },
   taskContainer: {
     marginBottom: 10,
   },
   taskText: {
     fontSize: 16,
-    fontWeight: 500,
+    fontWeight: 600,
     marginBottom: 10,
-    color: '#C5C5D2'
+    color: '#C5C5D2',
+  },
+  loadingSt: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 })

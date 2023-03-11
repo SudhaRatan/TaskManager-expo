@@ -1,21 +1,114 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import {
   View,
   Text,
+  Animated,
+  Pressable,
 } from 'react-native';
 import ProgressBar from './ProgressBar';
+import { Entypo } from '@expo/vector-icons'
+import { useRef, useState, useEffect, useCallback } from 'react';
+import { ToastAndroid } from 'react-native';
+import { AnimatePresence, MotiView } from 'moti';
+import { AntDesign } from '@expo/vector-icons';
+import { getTaskDetails } from '../db-functions/db';
+import { useFocusEffect } from '@react-navigation/native';
 
-const CategoryCard = ({ name, tasks, color, progress }) => {
+const CategoryCard = (props) => {
+
+  const pressInOut = (val) => {
+    Animated.spring(scale, {
+      toValue: val,
+      useNativeDriver: true,
+    }).start()
+  }
+  const scale = useRef(new Animated.Value(1)).current
+  const [toggle, setToggle] = useState(false)
+  const [checked, setChecked] = useState(0)
+  const [unchecked, setUnchecked] = useState(0)
+  const [total, setTotal] = useState(0)
+
+  const hideOptions = () => setToggle(false)
+
+  const getTD = async () => {
+    const res = await getTaskDetails(props._id);
+    if(res.progress) setTotal(res.progress)
+    else setTotal(0)
+    setChecked(res.checked)
+    setUnchecked(res.unchecked)
+  }
+
+  useEffect(() => {
+    getTD()
+  }, [props.change])
+
+  useFocusEffect(useCallback(() => {
+    getTD()
+  },[props.change]))
+
   return (
-    <View style={St.categoryContainer}>
-      <Text style={St.numTasks}>
-        {tasks} Tasks
-      </Text>
-      <Text style={St.categoryName}>{name} </Text>
-      <View>
-        <ProgressBar progress={progress} color={color} />
+    <Pressable
+      onPressIn={() => pressInOut(0.92)}
+      onPressOut={() => pressInOut(1)}
+      onLongPress={() => setToggle(true)}
+    >
+      <Animated.View style={{ transform: [{ scale }] }}>
+        <View style={St.categoryContainer}>
+          <AnimatePresence>
+            {toggle && <Options {...props} hideOptions={hideOptions} />}
+            {!toggle && <Main {...props} checked={checked} unchecked={unchecked} total={total} />}
+          </AnimatePresence>
+        </View>
+      </Animated.View>
+    </Pressable>
+  )
+}
+
+const Main = ({ _id, name, iconName, iconColor, checked, unchecked, total }) => {
+  return (
+    <MotiView
+      from={{ translateX: -20, opacity: 0 }}
+      animate={{ translateX: 0, opacity: 1 }}
+      exit={{ translateX: 20, opacity: 1 }}
+      transition={{
+        type: 'timing'
+      }}
+      style={{ flex: 1 }}
+    >
+      <View style={St.taskIconName}>
+        <Text style={St.numTasks}>
+          {
+            `${checked + unchecked} Tasks`
+          }
+        </Text>
+        <Entypo name={iconName} size={24} color={iconColor} />
       </View>
-    </View>
+      <Text style={St.categoryName}>{name}</Text>
+      <View>
+        <ProgressBar progress={total} color={iconColor} />
+      </View>
+    </MotiView>
+  )
+}
+
+const Options = ({ _id, iconColor, hideOptions, deleteCategory }) => {
+  return (
+    <MotiView
+      style={St.optionCont}
+      from={{ translateX: 20, opacity: 0 }}
+      animate={{ translateX: 0, opacity: 1 }}
+      exit={{ translateX: -20, opacity: 1 }}
+      transition={{
+        type: 'timing'
+      }}
+    >
+      <TouchableOpacity style={[St.iconCont, { borderColor: iconColor }]} onPress={hideOptions}>
+        <AntDesign name="back" size={38} color={iconColor} />
+      </TouchableOpacity>
+      <TouchableOpacity style={[St.iconCont, { borderColor: iconColor }]} onPress={() => deleteCategory(_id)}>
+        <AntDesign name="delete" size={38} color={iconColor} />
+      </TouchableOpacity>
+    </MotiView>
   )
 }
 
@@ -31,8 +124,19 @@ const St = StyleSheet.create({
     borderRadius: 24,
     padding: 20,
   },
-  numTasks: {
+  optionCont: {
     flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+  },
+  iconCont: {
+    backgroundColor: '#fff',
+    padding: 5,
+    borderWidth: 1,
+    borderRadius: 5,
+  },
+  numTasks: {
     color: '#A7A7B7',
   },
   categoryName: {
@@ -41,4 +145,8 @@ const St = StyleSheet.create({
     color: '#292C38',
     flex: 1,
   },
+  taskIconName: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  }
 })

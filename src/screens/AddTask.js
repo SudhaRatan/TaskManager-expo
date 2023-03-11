@@ -10,18 +10,19 @@ import {
   StyleSheet,
   ToastAndroid,
 } from 'react-native';
-import { insertCategory } from '../db-functions/db';
-import { Entypo } from '@expo/vector-icons';
+import { insertTask } from '../db-functions/db';
+import { Entypo, Octicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
-import SelectIcons from '../components/selectIcons';
+import SelectCategories from '../components/selectCategories';
 
-const AddCategory = () => {
-  // console.log(iconNames)
+const AddTask = () => {
   const [name, setName] = useState('')
+  const [catId, setId] = useState(null)
   const [iconColor, setIconColor] = useState("#3067C0")
-  const [iconName, setIconName] = useState("home")
+  const [iconName, setIconName] = useState("chevron-down")
+  const [categoryName, setCategoryName] = useState('Select a category')
   const { width, height } = Dimensions.get('window')
   const navigation = useNavigation()
   const [toggle, setToggle] = useState(false)
@@ -44,23 +45,10 @@ const AddCategory = () => {
     }
   }
 
-  const showColorPallete = () => {
-    setToggle(!toggle)
-    if (toggle) {
-      Animated.spring(scale, {
-        toValue: 0,
-        useNativeDriver: true
-      }).start()
-    } else {
-      Animated.spring(scale, {
-        toValue: 1,
-        useNativeDriver: true
-      }).start()
-    }
-  }
-
-  const setIcon = (name) => {
-    setIconName(name)
+  const setCat = ({ _id, name, iconName }) => {
+    setIconName(iconName)
+    setCategoryName(name)
+    setId(_id)
     Animated.spring(iconContScale, {
       toValue: 0,
       useNativeDriver: true
@@ -68,8 +56,8 @@ const AddCategory = () => {
     setToggle1(!toggle1)
   }
 
-  const AddCategoryFunc = async () => {
-    const res = await insertCategory({ name, iconName, iconColor })
+  const AddTaskFunc = async () => {
+    const res = await insertTask({ name, categoryId: catId, checked: false, Date: Date.now() })
     if (res.stat) {
       navigation.navigate('Home')
     }
@@ -93,12 +81,11 @@ const AddCategory = () => {
         <View style={St.form}>
           <TextInput
             style={[St.enterCategory, { width: width * 0.75, }]}
-            placeholder='Enter new category'
+            placeholder='Enter new task'
             placeholderTextColor="#7B7998"
             value={name}
             onChangeText={(value) => {
               setName(value)
-              console.log(name)
             }}
           />
           <View style={St.selectCont}>
@@ -126,52 +113,17 @@ const AddCategory = () => {
                 <View
                   style={[
                     {
-                      width: width * 0.75 * 0.6,
-                      borderRadius: width * 0.75 * 0.6 * 0.5,
+                      borderRadius: width * 0.75 * 0.6,
                     },
                     St.chooseIconsContainer
                   ]}
                 >
-                  <Text style={St.selIconText}>Select an icon</Text>
+                  <Text style={St.selIconText}>{categoryName}</Text>
                   <Entypo name={iconName} size={24} color={iconColor} />
                 </View>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              style={St.colorCont}
-              onPress={showColorPallete}
-            >
-              <Ionicons name="md-radio-button-on" size={38} color={iconColor} />
-            </TouchableOpacity>
           </View>
-          <Animated.View style={[
-            {
-              transform: [
-                {
-                  translateX: scale.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [-width, 0]
-                  })
-                }
-              ]
-            },
-            St.iconSelect
-          ]}>
-            {
-              colorPallete.map((item, index) => {
-                return (
-                  <TouchableOpacity key={index}
-                    onPress={() => {
-                      setIconColor(item)
-                      showColorPallete()
-                    }}
-                  >
-                    <Ionicons name="md-radio-button-on" size={38} color={item} />
-                  </TouchableOpacity>
-                )
-              })
-            }
-          </Animated.View>
           <Animated.View style={[
             {
               width: width * 0.8,
@@ -185,7 +137,7 @@ const AddCategory = () => {
               ],
             },
           ]}>
-            <SelectIcons setIcon={setIcon} />
+            <SelectCategories setCat={setCat} />
           </Animated.View>
         </View>
       </View>
@@ -209,9 +161,10 @@ const AddCategory = () => {
           <TouchableOpacity
             activeOpacity={0.5}
             style={St.addCatButton}
-            onPress={AddCategoryFunc}
+            onPress={AddTaskFunc}
           >
-            <Text style={St.addCatButtonText}>Add Category</Text>
+            <Text style={St.addCatButtonText}>Add Task</Text>
+            <Octicons name="tasklist" size={16} color="#F9FAFE" />
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -219,7 +172,7 @@ const AddCategory = () => {
   )
 }
 
-export default AddCategory;
+export default AddTask;
 
 export const St = StyleSheet.create({
   container: {
@@ -237,7 +190,6 @@ export const St = StyleSheet.create({
     alignItems: 'center',
   },
   mainContainer: {
-    // flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F9FAFE'
@@ -265,14 +217,14 @@ export const St = StyleSheet.create({
   },
   chooseIconsButton: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    // alignItems: 'center',
+    // justifyContent: 'center',
   },
   chooseIconsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
+    padding: 10,
     gap: 5,
     borderWidth: 1,
     borderColor: '#7B7998',
@@ -315,6 +267,10 @@ export const St = StyleSheet.create({
     padding: 12,
     paddingHorizontal: 20,
     borderRadius: 100,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 10,
   },
   addCatButtonText: {
     color: '#F9FAFE',
