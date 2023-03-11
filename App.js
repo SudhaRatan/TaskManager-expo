@@ -6,8 +6,8 @@ import MainNavigation from './src/navigation/MainNavigation';
 function App() {
   return (
     <>
+      <StatusBar style='dark' />
       <MainNavigation />
-      <StatusBar style='light' />
     </>
   );
 }

@@ -5,6 +5,7 @@ import {
   Dimensions,
   Animated,
   TouchableWithoutFeedback,
+  ToastAndroid,
 } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { AntDesign } from '@expo/vector-icons';
@@ -12,12 +13,13 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StyleSheet } from 'react-native';
 
-const Add = () => {
+const Add = ({ enableTaskButton }) => {
 
   const navigation = useNavigation();
   const scale = useRef(new Animated.Value(0)).current
   const { width, height } = Dimensions.get('window')
   const addButtonHeight = Math.floor(width < height ? height * 0.08 : width * 0.08)
+
   useEffect(() => {
     scaleUp();
   }, [scale]);
@@ -60,8 +62,13 @@ const Add = () => {
   }
 
   const addTask = () => {
-    handlePress()
-    navigation.navigate('AddTask')
+    let res = enableTaskButton()
+    if (res) {
+      handlePress()
+      navigation.navigate('AddTask')
+    } else {
+      ToastAndroid.show("Add a category first",1000)
+    }
   }
 
   return (
@@ -93,7 +100,7 @@ const Add = () => {
               {
                 translateX: translateY.interpolate({
                   inputRange: [0, addButtonHeight / 3, addButtonHeight],
-                  outputRange: [0, addButtonHeight*1.2, -addButtonHeight * 0.4]
+                  outputRange: [0, addButtonHeight * 1.2, -addButtonHeight * 0.4]
                 })
               }
             ]
@@ -130,7 +137,7 @@ const Add = () => {
               {
                 translateX: translateY.interpolate({
                   inputRange: [0, addButtonHeight / 3, addButtonHeight],
-                  outputRange: [0, -addButtonHeight*1.2, -addButtonHeight * 0.6]
+                  outputRange: [0, -addButtonHeight * 1.2, -addButtonHeight * 0.6]
                 })
               }
             ]
@@ -193,7 +200,7 @@ const St = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 5,
-    elevation:2,
+    elevation: 2,
   },
   taskButtonText: {
     // fontSize: 16,

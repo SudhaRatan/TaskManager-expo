@@ -13,8 +13,11 @@ import { AnimatePresence, MotiView } from 'moti';
 import { AntDesign } from '@expo/vector-icons';
 import { getTaskDetails } from '../db-functions/db';
 import { useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 const CategoryCard = (props) => {
+
+  const navigation = useNavigation()
 
   const pressInOut = (val) => {
     Animated.spring(scale, {
@@ -22,6 +25,7 @@ const CategoryCard = (props) => {
       useNativeDriver: true,
     }).start()
   }
+
   const scale = useRef(new Animated.Value(1)).current
   const [toggle, setToggle] = useState(false)
   const [checked, setChecked] = useState(0)
@@ -51,6 +55,7 @@ const CategoryCard = (props) => {
       onPressIn={() => pressInOut(0.92)}
       onPressOut={() => pressInOut(1)}
       onLongPress={() => setToggle(true)}
+      onPress={() => {navigation.navigate('Category',{id : props._id})}}
     >
       <Animated.View style={{ transform: [{ scale }] }}>
         <View style={St.categoryContainer}>

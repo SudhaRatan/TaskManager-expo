@@ -112,7 +112,7 @@ const TaskCard = ({ name, checked, _id, handleDelete, categoryId, changeState })
           ]}>
             <AnimatePresence>
               {!check && <CheckBox color={color} handleCheck={handleCheck} />}
-              {check && <CheckBox1 handleCheck={handleCheck} />}
+              {check && <CheckBox1 color={color} handleCheck={handleCheck} />}
             </AnimatePresence>
             <Text style={[
               {

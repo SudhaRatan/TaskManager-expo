@@ -2,7 +2,7 @@ import { Pressable } from 'react-native';
 import { MotiView } from 'moti';
 import { MaterialIcons } from '@expo/vector-icons';
 
-const CheckBox1 = ({ handleCheck }) => {
+const CheckBox1 = ({ handleCheck, color }) => {
 
 
   return (
@@ -21,7 +21,7 @@ const CheckBox1 = ({ handleCheck }) => {
           scale: 0.4,
         }}
       >
-        <MaterialIcons name="check-circle" size={25} color="green" />
+        <MaterialIcons name="check-circle" size={25} color={color} />
       </MotiView>
 
     </Pressable>

@@ -6,11 +6,13 @@ import {
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
 
 import Home from '../screens/Home';
 import MyDrawer from '../components/MyDrawer';
 import AddCategory from '../screens/AddCategory';
 import AddTask from '../screens/AddTask';
+import Category from '../screens/Category';
 
 const MainStack = createStackNavigator();
 const MainDrawerNavig = createDrawerNavigator();
@@ -44,10 +46,12 @@ const MainDrawer = () => {
 const MainNavigation = () => {
   return (
     <NavigationContainer>
+    <StatusBar style='dark' />
       <MainStack.Navigator screenOptions={{
         header: () => null
       }}>
         <MainStack.Screen name="Main" component={MainDrawer} />
+        <MainStack.Screen name="Category" component={Category} />
         <MainStack.Screen name="AddCategory" component={AddCategory} />
         <MainStack.Screen name="AddTask" component={AddTask} />
       </MainStack.Navigator>

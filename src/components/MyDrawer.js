@@ -9,10 +9,16 @@ import { Entypo } from '@expo/vector-icons';
 import { Pressable } from 'react-native';
 import { DrawerActions } from '@react-navigation/native';
 import { StyleSheet } from 'react-native';
+import { StatusBar as SB } from 'expo-status-bar';
+import { useDrawerStatus } from '@react-navigation/drawer';
 
 const MyDrawer = (props) => {
+
   return (
     <View style={St.drawerContainer}>
+      {
+        useDrawerStatus() === "open" && <SB style='light' />
+      }
       <DrawerContentScrollView {...props} >
         <View>
           <View style={St.profileIconContainer}>

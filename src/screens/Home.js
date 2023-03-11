@@ -38,9 +38,15 @@ const Home = ({ navigation }) => {
     setLoading(false)
   }
 
+  const enableTaskButton = () => {
+    if (categories === null) return false
+    else return true
+  }
+
   const getLatestTasks = async () => {
     tt.find({}).sort({ Date: -1 }).limit(10).exec((err, res) => {
       if (res.length > 0) setTasks(res)
+      else setTasks(null)
       setLoadingTasks(false)
     })
   }
@@ -72,7 +78,7 @@ const Home = ({ navigation }) => {
     }
   }
 
-  handleToggle = () => {
+  const handleToggle = () => {
     navigation.toggleDrawer()
     Animated.timing(scale, {
       toValue: 0.85,
@@ -198,7 +204,7 @@ const Home = ({ navigation }) => {
           </View>
         </View>
       </Animated.ScrollView>
-      <Add />
+      <Add enableTaskButton={enableTaskButton} />
     </View>
   )
 }
