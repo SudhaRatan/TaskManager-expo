@@ -1,9 +1,10 @@
 import {
   View,
   Text,
-  Animated,
+  Animated as Anim,
   Dimensions,
   StyleSheet,
+  ScrollView,
 } from 'react-native';
 import { useDrawerStatus } from '@react-navigation/drawer';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -18,6 +19,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator } from 'react-native';
 import { deleteCategory, tt, deleteTask } from '../db-functions/db';
 import { ToastAndroid } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 const Home = ({ navigation }) => {
 
@@ -25,7 +27,7 @@ const Home = ({ navigation }) => {
   const [loading, setLoading] = useState(true)
   const [loadingTasks, setLoadingTasks] = useState(true)
   const [categories, setCategories] = useState(null)
-  const [change,setChange] = useState(false)
+  const [change, setChange] = useState(false)
 
   const changeState = () => {
     setChange(!change)
@@ -44,7 +46,7 @@ const Home = ({ navigation }) => {
   }
 
   const getLatestTasks = async () => {
-    tt.find({}).sort({ Date: -1 }).limit(10).exec((err, res) => {
+    tt.find({}).sort({ Date: -1 }).exec((err, res) => {
       if (res.length > 0) setTasks(res)
       else setTasks(null)
       setLoadingTasks(false)
@@ -64,13 +66,13 @@ const Home = ({ navigation }) => {
 
   const drawerAnim = () => {
     if (!isDrawerOpen) {
-      Animated.timing(scale, {
+      Anim.timing(scale, {
         toValue: 1,
         useNativeDriver: true,
         duration: 200,
       }).start()
     } else {
-      Animated.timing(scale, {
+      Anim.timing(scale, {
         toValue: 0.85,
         useNativeDriver: true,
         duration: 200,
@@ -80,14 +82,14 @@ const Home = ({ navigation }) => {
 
   const handleToggle = () => {
     navigation.toggleDrawer()
-    Animated.timing(scale, {
+    Anim.timing(scale, {
       toValue: 0.85,
       useNativeDriver: true,
       duration: 200,
     }).start()
   }
 
-  const scale = useRef(new Animated.Value(1)).current
+  const scale = useRef(new Anim.Value(1)).current
 
   const { height, width } = Dimensions.get('window')
 
@@ -107,7 +109,7 @@ const Home = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#111E53', height: height, }} >
-      <Animated.ScrollView
+      <Anim.ScrollView
         stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
         style={[St.content, {
@@ -142,17 +144,15 @@ const Home = ({ navigation }) => {
                   :
                   categories
                     ?
-                    <FlatList
-                      showsHorizontalScrollIndicator={false}
-                      horizontal
-                      keyExtractor={item => item._id}
-                      data={categories}
-                      renderItem={({ item }) => {
-                        return (
-                          <CategoryCard {...item} deleteCategory={deleteCategoryById} change={change} />
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                      {
+                    categories.map((item,index) => {
+                      return (
+                          <CategoryCard key={item._id} {...item} index={index} deleteCategory={deleteCategoryById} change={change} />
                         )
-                      }}
-                    />
+                    })
+                      }
+                    </ScrollView>
                     :
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                       <Text style={St.categoriesText}>Add Categories to display here</Text>
@@ -177,33 +177,18 @@ const Home = ({ navigation }) => {
                     ?
                     tasks.map((item, index) => {
                       return (
-                        <AnimatePresence key={item._id}>
-                          <MotiView
-                            from={{
-                              translateX: -30
-                            }}
-                            animate={{
-                              translateX: 0
-                            }}
-                            transition={{
-                              delay: 100 * index,
-                              type: 'spring'
-                            }}
-                          >
-                            <TaskCard handleDelete={handleDelete} {...item} change={change} changeState={changeState} />
-                          </MotiView>
-                        </AnimatePresence>
+                        <TaskCard key={item._id} index={index} handleDelete={handleDelete} {...item} change={change} changeState={changeState} />
                       )
                     })
                     :
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop:50 }}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 50 }}>
                       <Text style={St.categoriesText}>Add Tasks to display here</Text>
                     </View>
               }
             </View>
           </View>
         </View>
-      </Animated.ScrollView>
+      </Anim.ScrollView>
       <Add enableTaskButton={enableTaskButton} />
     </View>
   )

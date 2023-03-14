@@ -2,7 +2,7 @@ import { StyleSheet, TouchableOpacity } from 'react-native';
 import {
   View,
   Text,
-  Animated,
+  Animated as Anim,
   Pressable,
 } from 'react-native';
 import ProgressBar from './ProgressBar';
@@ -14,19 +14,19 @@ import { AntDesign } from '@expo/vector-icons';
 import { getTaskDetails } from '../db-functions/db';
 import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
+import Animated, { Layout, SlideInDown, SlideInUp, ZoomIn, ZoomOutDown } from 'react-native-reanimated';
 
 const CategoryCard = (props) => {
 
   const navigation = useNavigation()
-
   const pressInOut = (val) => {
-    Animated.spring(scale, {
+    Anim.spring(scale, {
       toValue: val,
       useNativeDriver: true,
     }).start()
   }
 
-  const scale = useRef(new Animated.Value(1)).current
+  const scale = useRef(new Anim.Value(1)).current
   const [toggle, setToggle] = useState(false)
   const [checked, setChecked] = useState(0)
   const [unchecked, setUnchecked] = useState(0)
@@ -36,7 +36,7 @@ const CategoryCard = (props) => {
 
   const getTD = async () => {
     const res = await getTaskDetails(props._id);
-    if(res.progress) setTotal(res.progress)
+    if (res.progress) setTotal(res.progress)
     else setTotal(0)
     setChecked(res.checked)
     setUnchecked(res.unchecked)
@@ -48,24 +48,41 @@ const CategoryCard = (props) => {
 
   useFocusEffect(useCallback(() => {
     getTD()
-  },[props.change]))
+  }, [props.change]))
+
+  // console.log(props)
 
   return (
-    <Pressable
-      onPressIn={() => pressInOut(0.92)}
-      onPressOut={() => pressInOut(1)}
-      onLongPress={() => setToggle(true)}
-      onPress={() => {navigation.navigate('Category',{id : props._id})}}
+    <Animated.View
+    entering={SlideInDown.springify().damping(16).delay(props.index * 50)}
+    exiting={ZoomOutDown}
+    layout={Layout}
     >
-      <Animated.View style={{ transform: [{ scale }] }}>
-        <View style={St.categoryContainer}>
-          <AnimatePresence>
-            {toggle && <Options {...props} hideOptions={hideOptions} />}
-            {!toggle && <Main {...props} checked={checked} unchecked={unchecked} total={total} />}
-          </AnimatePresence>
-        </View>
-      </Animated.View>
-    </Pressable>
+      <Pressable
+        onPressIn={() => pressInOut(0.92)}
+        onPressOut={() => pressInOut(1)}
+        onLongPress={() => setToggle(true)}
+        onPress={() => {
+          navigation.navigate('Category', {
+            id: props._id,
+            progress: total,
+            color: props.iconColor,
+            total: checked + unchecked,
+            name: props.name,
+
+          })
+        }}
+      >
+        <Anim.View style={{ transform: [{ scale }] }}>
+          <View style={St.categoryContainer}>
+            <AnimatePresence>
+              {toggle && <Options {...props} hideOptions={hideOptions} />}
+              {!toggle && <Main {...props} checked={checked} unchecked={unchecked} total={total} />}
+            </AnimatePresence>
+          </View>
+        </Anim.View>
+      </Pressable>
+    </Animated.View>
   )
 }
 

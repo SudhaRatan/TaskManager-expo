@@ -2,7 +2,7 @@ import {
   View,
   Text,
   Dimensions,
-  Animated,
+  Animated as Anim,
   Pressable,
   StyleSheet,
 } from 'react-native';
@@ -15,23 +15,24 @@ import CheckBox from './checkBox';
 import CheckBox1 from './checkBox1';
 import { getCategoryColor } from '../db-functions/db';
 import { handleCheck as hc } from '../db-functions/db';
+import Animated, { BounceInLeft, BounceOut, BounceOutRight, FadeIn, FadeInLeft, JumpingTransition, Layout, SlideInLeft, SlideOutLeft, SlideOutRight, ZoomInLeft, ZoomOut, ZoomOutLeft, ZoomOutRight } from 'react-native-reanimated';
 
-const TaskCard = ({ name, checked, _id, handleDelete, categoryId, changeState }) => {
+const TaskCard = ({ name, checked, _id, index, handleDelete, categoryId, changeState }) => {
   const { width, height } = Dimensions.get('window')
   const addButtonHeight = Math.floor(width < height ? height * 0.075 : width * 0.075)
   const [check, setCheck] = useState(checked)
-  const [color,setColor] = useState(null)
+  const [color, setColor] = useState(null)
 
   const pressInOut = (val) => {
-    Animated.spring(scale1, {
+    Anim.spring(scale1, {
       toValue: val,
       useNativeDriver: true,
     }).start()
   }
-  const scale1 = useRef(new Animated.Value(1)).current
+  const scale1 = useRef(new Anim.Value(1)).current
 
   const handleCheck = () => {
-    hc(_id,check)
+    hc(_id, check)
     setCheck(!check)
     changeState()
   }
@@ -51,7 +52,7 @@ const TaskCard = ({ name, checked, _id, handleDelete, categoryId, changeState })
       extrapolate: 'clamp',
     })
     return (
-      <Animated.View
+      <Anim.View
         style={[
           {
             transform: [{ scale: scale }],
@@ -63,7 +64,7 @@ const TaskCard = ({ name, checked, _id, handleDelete, categoryId, changeState })
         ]}
       >
         <MaterialIcons name="edit" size={50} color="white" />
-      </Animated.View>
+      </Anim.View>
     )
   }
 
@@ -74,7 +75,7 @@ const TaskCard = ({ name, checked, _id, handleDelete, categoryId, changeState })
       extrapolate: 'clamp',
     })
     return (
-      <Animated.View
+      <Anim.View
         style={[
           {
             transform: [{ scale: scale }],
@@ -90,19 +91,23 @@ const TaskCard = ({ name, checked, _id, handleDelete, categoryId, changeState })
         >
           <MaterialCommunityIcons name="delete" size={50} color="white" />
         </Pressable>
-      </Animated.View>
+      </Anim.View>
     )
   }
 
   return (
-    <View>
+    <Animated.View
+      entering={SlideInLeft.delay(index * 50).springify().damping(13)}
+      exiting={SlideOutLeft}
+      layout={Layout.springify().damping(13)}
+    >
       <Swipeable renderLeftActions={leftSwipe} renderRightActions={rightSwipe}>
         <Pressable
           onPressIn={() => pressInOut(0.92)}
           onPressOut={() => pressInOut(1)}
           onPress={handleCheck}
         >
-          <Animated.View style={[
+          <Anim.View style={[
             {
               width: width - 40,
               transform: [{ scale: scale1 }],
@@ -123,10 +128,10 @@ const TaskCard = ({ name, checked, _id, handleDelete, categoryId, changeState })
             ]}>
               {name}
             </Text>
-          </Animated.View>
+          </Anim.View>
         </Pressable>
       </Swipeable>
-    </View>
+    </Animated.View>
   )
 }
 
