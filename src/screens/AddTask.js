@@ -62,7 +62,6 @@ const AddTask = () => {
       navigation.navigate('Home')
     }
     ToastAndroid.show(res.message, 2000)
-
   }
 
   return (

@@ -69,7 +69,6 @@ const CategoryCard = (props) => {
             color: props.iconColor,
             total: checked + unchecked,
             name: props.name,
-
           })
         }}
       >

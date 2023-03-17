@@ -46,7 +46,8 @@ const Home = ({ navigation }) => {
   }
 
   const getLatestTasks = async () => {
-    tt.find({}).sort({ Date: -1 }).exec((err, res) => {
+    setTasks(null)
+    tt.find({}).sort({ Date: -1 }).limit(10).exec((err, res) => {
       if (res.length > 0) setTasks(res)
       else setTasks(null)
       setLoadingTasks(false)
@@ -146,11 +147,11 @@ const Home = ({ navigation }) => {
                     ?
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                       {
-                    categories.map((item,index) => {
-                      return (
-                          <CategoryCard key={item._id} {...item} index={index} deleteCategory={deleteCategoryById} change={change} />
-                        )
-                    })
+                        categories.map((item, index) => {
+                          return (
+                            <CategoryCard key={item._id} {...item} index={index} deleteCategory={deleteCategoryById} change={change} changeState={changeState} />
+                          )
+                        })
                       }
                     </ScrollView>
                     :
