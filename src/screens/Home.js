@@ -10,16 +10,13 @@ import { useDrawerStatus } from '@react-navigation/drawer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Header from '../components/Header';
 import CategoryCard from '../components/CategoryCard';
-import { FlatList } from 'react-native-gesture-handler';
 import TaskCard from '../components/TaskCard';
-import { AnimatePresence, MotiView } from 'moti';
 import { getCategories } from '../db-functions/db';
 import Add from '../components/Add';
 import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator } from 'react-native';
 import { deleteCategory, tt, deleteTask } from '../db-functions/db';
 import { ToastAndroid } from 'react-native';
-import Animated from 'react-native-reanimated';
 
 const Home = ({ navigation }) => {
 
@@ -67,32 +64,30 @@ const Home = ({ navigation }) => {
 
   const drawerAnim = () => {
     if (!isDrawerOpen) {
-      Anim.timing(scale, {
+      Anim.spring(scale, {
         toValue: 1,
         useNativeDriver: true,
-        duration: 200,
       }).start()
     } else {
-      Anim.timing(scale, {
+      Anim.spring(scale, {
         toValue: 0.85,
         useNativeDriver: true,
-        duration: 200,
       }).start()
     }
   }
 
   const handleToggle = () => {
     navigation.toggleDrawer()
-    Anim.timing(scale, {
+    Anim.spring(scale, {
       toValue: 0.85,
       useNativeDriver: true,
-      duration: 200,
     }).start()
   }
 
   const scale = useRef(new Anim.Value(1)).current
 
   const { height, width } = Dimensions.get('window')
+  const addButtonHeight = Math.floor(width < height ? height * 0.075 : width * 0.075)
 
   const handleDelete = async (_id) => {
     const res = await deleteTask(_id)
@@ -117,7 +112,7 @@ const Home = ({ navigation }) => {
           transform: [{ scale }],
           borderRadius: scale.interpolate({
             inputRange: [0.9, 1],
-            outputRange: [15, 0]
+            outputRange: [15, 0],
           }),
         }]}>
         <Header handleClick={handleToggle} />
@@ -176,11 +171,16 @@ const Home = ({ navigation }) => {
                   :
                   tasks
                     ?
-                    tasks.map((item, index) => {
-                      return (
-                        <TaskCard key={item._id} index={index} handleDelete={handleDelete} {...item} change={change} changeState={changeState} />
-                      )
-                    })
+                    <View>
+                      {
+                        tasks.map((item, index) => {
+                          return (
+                            <TaskCard key={item._id} index={index} handleDelete={handleDelete} {...item} change={change} changeState={changeState} />
+                          )
+                        })
+                      }
+                      <View style={{ height: addButtonHeight }} />
+                    </View>
                     :
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 50 }}>
                       <Text style={St.categoriesText}>Add Tasks to display here</Text>

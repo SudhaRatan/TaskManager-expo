@@ -1,6 +1,4 @@
 import {
-  View,
-  Text,
   Dimensions
 } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';

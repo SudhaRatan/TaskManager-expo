@@ -15,7 +15,7 @@ import CheckBox from './checkBox';
 import CheckBox1 from './checkBox1';
 import { getCategoryColor } from '../db-functions/db';
 import { handleCheck as hc } from '../db-functions/db';
-import Animated, { BounceInLeft, BounceOut, BounceOutRight, FadeIn, FadeInLeft, JumpingTransition, Layout, SlideInLeft, SlideOutLeft, SlideOutRight, ZoomInLeft, ZoomOut, ZoomOutLeft, ZoomOutRight } from 'react-native-reanimated';
+import Animated, { Layout, SlideInLeft, SlideOutLeft } from 'react-native-reanimated';
 
 const TaskCard = ({ name, checked, _id, index, handleDelete, categoryId, changeState }) => {
   const { width, height } = Dimensions.get('window')

@@ -2,7 +2,6 @@ import { Pressable, StatusBar, StyleSheet } from 'react-native';
 import {
   View,
   Text,
-  ScrollView,
   Dimensions,
   Animated,
   ActivityIndicator,
@@ -10,15 +9,12 @@ import {
 } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 import CircularProgressBase from 'react-native-circular-progress-indicator';
-import { TouchableOpacity } from 'react-native';
 import { useRef, useState, useEffect } from 'react';
 import { tt, deleteTask, getTaskDetails, insertTask } from '../db-functions/db';
 import TaskCard from '../components/TaskCard';
 import AddTask from '../components/addTaskInp';
 
-
 const Category = ({ route, navigation }) => {
-
 
   const [tasks, setTasks] = useState(null)
   const [loadingTasks, setLoadingTasks] = useState(true)
@@ -56,7 +52,7 @@ const Category = ({ route, navigation }) => {
   const handleDelete = async (_id) => {
     const res = await deleteTask(_id)
     if (res.stat) {
-      // changeState()
+      getTD()
       setTasks(tasks.filter(task => task._id !== _id))
     } else { ToastAndroid("Error occured", 1000) }
   }
@@ -71,7 +67,7 @@ const Category = ({ route, navigation }) => {
   const AddTaskFunc = async () => {
     setNewTask('')
     const res = await insertTask({ name: newTask, categoryId: route.params.id, checked: false, Date: Date.now() })
-    if(newTask !== ''){
+    if (newTask !== '') {
       changeState()
     }
     ToastAndroid.show(res.message, 2000)
@@ -147,14 +143,19 @@ const Category = ({ route, navigation }) => {
               :
               tasks
                 ?
-                tasks.map((item, index) => {
-                  return (
-                    <TaskCard key={item._id} index={index} handleDelete={handleDelete} {...item}
-                      change={change}
-                      changeState={changeState}
-                    />
-                  )
-                })
+                <View>
+                  {
+                    tasks.map((item, index) => {
+                      return (
+                        <TaskCard key={item._id} index={index} handleDelete={handleDelete} {...item}
+                          change={change}
+                          changeState={changeState}
+                        />
+                      )
+                    })
+                  }
+                  <View style={{ height: addButtonHeight }} />
+                </View>
                 :
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 50 }}>
                   <Text style={St.categoriesText}>Add Tasks to display here</Text>
