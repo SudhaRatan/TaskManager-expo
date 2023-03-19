@@ -1,9 +1,9 @@
 import Datastore from "react-native-local-mongodb";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState } from 'react';
 
 const ct = new Datastore({ filename: 'categories', storage: AsyncStorage, autoload: true });
 const tt = new Datastore({ filename: 'tasks', storage: AsyncStorage, autoload: true });
-
 
 // categories //
 const insertCategory = async (cat) => {
@@ -44,7 +44,7 @@ const getCategoryColor = async (id) => {
 }
 
 const getTaskDetails = async (id) => {
-  const total = await tt.findAsync({categoryId: id})
+  const total = await tt.findAsync({ categoryId: id })
   const checkedCount = await tt.findAsync({ categoryId: id, checked: true })
   const uncheckedCount = await tt.findAsync({ categoryId: id, checked: false })
   return {
@@ -83,6 +83,19 @@ const getLatestTasks = async () => {
   })
 }
 
+const getTasks = (categoryId) => {
+  return new Promise((resolve, reject) => {
+    tt.find({ categoryId: categoryId }).sort({ Date: -1 }).exec((err, res) => {
+      if (res.length > 0) resolve(res)
+      else reject(err)
+    })
+  })
+}
+
+const getTasksAsync = async (categoryId) => {
+  return await tt.findAsync({ categoryId: categoryId })
+}
+
 const handleCheck = async (id, check) => {
   await tt.updateAsync({ _id: id }, { $set: { checked: !check } })
 }
@@ -110,4 +123,6 @@ export {
   handleCheck,
   getCategoryColor,
   getTaskDetails,
+  getTasks,
+  getTasksAsync
 }

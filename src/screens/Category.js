@@ -82,7 +82,7 @@ const Category = ({ route, navigation }) => {
       }} />
       <Pressable
         style={St.backCont(route.params.color)}
-        onPress={() => navigation.goBack()}
+        onPress={() => navigation.navigate('Home')}
       >
         <Entypo name='chevron-left' size={40} />
       </Pressable>

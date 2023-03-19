@@ -65,9 +65,7 @@ const CategoryCard = (props) => {
         onPress={() => {
           navigation.navigate('Category', {
             id: props._id,
-            progress: total,
             color: props.iconColor,
-            total: checked + unchecked,
             name: props.name,
           })
         }}

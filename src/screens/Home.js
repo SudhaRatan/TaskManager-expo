@@ -163,23 +163,23 @@ const Home = ({ navigation }) => {
             <Text style={St.taskText}>RECENTLY ADDED TASKS</Text>
             <View>
               {
-                loadingTasks
+                tasks
                   ?
-                  <View style={St.loadingSt}>
-                    <ActivityIndicator size="large" />
+                  <View>
+                    {
+                      tasks.map((item, index) => {
+                        return (
+                          <TaskCard key={item._id} index={index} handleDelete={handleDelete} {...item} change={change} changeState={changeState} />
+                        )
+                      })
+                    }
+                    <View style={{ height: addButtonHeight }} />
                   </View>
                   :
-                  tasks
+                  loadingTasks
                     ?
-                    <View>
-                      {
-                        tasks.map((item, index) => {
-                          return (
-                            <TaskCard key={item._id} index={index} handleDelete={handleDelete} {...item} change={change} changeState={changeState} />
-                          )
-                        })
-                      }
-                      <View style={{ height: addButtonHeight }} />
+                    <View style={St.loadingSt}>
+                      <ActivityIndicator size="large" />
                     </View>
                     :
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 50 }}>

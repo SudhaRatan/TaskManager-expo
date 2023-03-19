@@ -32,9 +32,9 @@ const TaskCard = ({ name, checked, _id, index, handleDelete, categoryId, changeS
   const scale1 = useRef(new Anim.Value(1)).current
 
   const handleCheck = () => {
-    hc(_id, check)
     setCheck(!check)
     changeState()
+    hc(_id, check)
   }
 
   const getColor = async () => {
