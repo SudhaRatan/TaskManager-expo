@@ -11,133 +11,69 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Header from '../components/Header';
 import CategoryCard from '../components/CategoryCard';
 import TaskCard from '../components/TaskCard';
-import { getCategories } from '../db-functions/db';
 import Add from '../components/Add';
 import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator } from 'react-native';
-import { deleteCategory, tt, deleteTask } from '../db-functions/db';
+import { deleteCategory, deleteTask } from '../db-functions/db';
 import { ToastAndroid } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import SQLite from 'react-native-sqlite-storage';
+
+import {
+  CreateCategoriesTable,
+  CreateTasksTable,
+  SelectCategories,
+  SelectLatestTasks,
+  dropCategories,
+  dropTasks,
+}
+  from '../db-functions/db-sqlite'
 
 // SQLite.enablePromise(true)
 
-const db = SQLite.openDatabase(
-  { name: 'Main1.db', location: 'default' },
-  () => { },
-  err => {
-    console.log(err)
-  }
-)
-
 const Home = ({ navigation }) => {
 
-  const CreateCatTable = () => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `CREATE TABLE if not exists categories (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          iconColor VARCHAR,
-          iconName VARCHAR,
-          name VARCHAR
-        );`,
-        [],
-        (tx, res) => {
-          // console.log(tx, res)
-        },
-        err => {
-          console.log(err)
-        }
-      )
+  const delCat = () => {
+    dropCategories()
+      .then(res => console.log(res))
+      .catch(err => console.log(err))
+    dropTasks()
+  }
+
+  const getCategories = () => {
+    // setLoading(true)
+    SelectCategories().then(({ stat, res }) => {
+      setCategories(res)
+      setLoading(false)
+    }).catch(err => {
+      console.log(err)
+      setLoading(false)
     })
   }
 
-  const insertVals = () => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `insert into categories (name, iconColor, iconName) values ( "Work","#F08A5D","briefcase" );`, []
-      );
-      tx.executeSql(
-        `insert into categories (name, iconColor, iconName) values ( "Hostel","#3067C0","home" );`, [],
-        (res, ress) => {
-          console.log(res, ress)
-        },
-        err => console.log(err)
-      );
-    })
-  }
-
-  const getCats = () => {
-    setLoading(true)
-    setCategories(null)
-    db.transaction((tx) => {
-      tx.executeSql(
-        `select * from categories`, [],
-        (tx, res) => {
-          console.log(res.rows.item)
-          let len = res.rows.length
-          if (len > 0) {
-            let results = []
-            for (let i = 0; i < len; i++) {
-              // console.log(res.rows.item(i))
-              results.push(res.rows.item(i))
-            }
-            setCategories(results)
-            setLoading(false)
-          }
-        },
-        err => {
-          console.log(err)
-        }
-      )
-    })
-  }
-
-  const getCatsAsync = () => {
-    return new Promise((resolve, reject) => {
-      db.transaction((tx) => {
-        tx.executeSql(
-          `select * from categories`, [],
-          (tx, res) => {
-            let len = res.rows.length
-            if (len > 0) {
-              let results = []
-              for (let i = 0; i < len; i++) {
-                results.push(res.rows.item(i))
-              }
-              resolve(results)
-            }
-          },
-          err => {
-            console.log(err)
-            reject(err)
-          }
-        )
+  const getTasks = () => {
+    // setLoadingTasks(true)
+    SelectLatestTasks()
+      .then(({stat,res}) => {
+        // console.log(res)
+        setTasks(res)
+        setLoadingTasks(false)
       })
-    })
-  }
-
-  const gca = async () => {
-    setLoading(true)
-    setCategories(null)
-    const results = await getCatsAsync();
-    setCategories(results)
-    setLoading(false)
+      .catch(err => setLoadingTasks(false))
   }
 
   const isDrawerOpen = useDrawerStatus() === 'open';
 
   useEffect(() => {
     drawerAnim();
-    // CreateCatTable();
-    // insertVals();
+    // delCat();
+    CreateCategoriesTable();
+    CreateTasksTable();
+    getCategories();
+    getTasks();
   }, [isDrawerOpen]);
 
   useFocusEffect(useCallback(() => {
-    getCategoriesFunc();
-    getLatestTasks();
-    gca();
-    // getCats();
+    getCategories();
+    getTasks();
   }, []))
 
   const [tasks, setTasks] = useState(null)
@@ -150,43 +86,10 @@ const Home = ({ navigation }) => {
     setChange(!change)
   }
 
-  const getCategoriesFunc = async () => {
-    // setCategories(null)
-    // setLoading(true)
-    // const res = await getCategories()
-    // if (res.stat) {
-    //   // const ress = await AsyncStorage.setItem('Categories', JSON.stringify(res.res))
-    //   setCategories(res.res)
-    // }
-    // else setCategories(null)
-    // const res = JSON.parse(await AsyncStorage.getItem('Categories'))
-    // setCategories(res)
-    // setLoading(false)
-  }
-
   const enableTaskButton = () => {
     if (categories === null) return false
     else return true
   }
-
-  const getLatestTasks = async () => {
-    setLoadingTasks(true)
-    setTasks(null)
-    // tt.find({}).sort({ Date: -1 }).limit(10).exec(async(err, res) => {
-    //   if (res.length > 0) {
-    //     setTasks(res)
-    //     // const ress = await AsyncStorage.setItem('Tasks', JSON.stringify(res))
-    //   }
-    //   else setTasks(null)
-    //   setLoadingTasks(false)
-    // })
-    const res = JSON.parse(await AsyncStorage.getItem('Tasks'))
-    // console.log(res)
-    setTasks(res)
-    setLoadingTasks(false)
-
-  }
-
 
   const drawerAnim = () => {
     if (!isDrawerOpen) {
@@ -303,7 +206,7 @@ const Home = ({ navigation }) => {
                       {
                         tasks.map((item, index) => {
                           return (
-                            <TaskCard key={item._id} index={index} handleDelete={handleDelete} {...item} change={change} changeState={changeState} />
+                            <TaskCard key={item.id} index={index} handleDelete={handleDelete} {...item} change={change} changeState={changeState} />
                           )
                         })
                       }

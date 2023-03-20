@@ -10,12 +10,13 @@ import {
   StyleSheet,
   ToastAndroid,
 } from 'react-native';
-import { insertCategory } from '../db-functions/db';
 import { Entypo } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import SelectIcons from '../components/selectIcons';
+
+import { insertCategory } from '../db-functions/db-sqlite';
 
 const AddCategory = () => {
   // console.log(iconNames)
@@ -68,13 +69,15 @@ const AddCategory = () => {
     setToggle1(!toggle1)
   }
 
-  const AddCategoryFunc = async () => {
-    const res = await insertCategory({ name, iconName, iconColor })
-    if (res.stat) {
-      navigation.navigate('Home')
-    }
-    ToastAndroid.show(res.message, 2000)
-
+  const AddCategoryFunc = () => {
+    insertCategory({ name, iconName, iconColor })
+      .then(({stat,message}) => {
+        if (stat) {
+          navigation.navigate('Home')
+        }
+        ToastAndroid.show(message, 2000)
+      })
+      .catch(({stat,message}) =>  ToastAndroid.show(message, 2000))
   }
 
   return (

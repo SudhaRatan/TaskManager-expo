@@ -13,16 +13,15 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { AnimatePresence } from 'moti';
 import CheckBox from './checkBox';
 import CheckBox1 from './checkBox1';
-import { getCategoryColor } from '../db-functions/db';
 import { handleCheck as hc } from '../db-functions/db';
 import Animated, { Layout, SlideInLeft, SlideOutLeft } from 'react-native-reanimated';
+import { SelectCategoryColor } from '../db-functions/db-sqlite';
 
-const TaskCard = ({ name, checked, _id, index, handleDelete, categoryId, changeState }) => {
+const TaskCard = ({ name, checked, id, index, handleDelete, categoryId, changeState }) => {
   const { width, height } = Dimensions.get('window')
   const addButtonHeight = Math.floor(width < height ? height * 0.075 : width * 0.075)
   const [check, setCheck] = useState(checked)
   const [color, setColor] = useState(null)
-
   const pressInOut = (val) => {
     Anim.spring(scale1, {
       toValue: val,
@@ -34,11 +33,11 @@ const TaskCard = ({ name, checked, _id, index, handleDelete, categoryId, changeS
   const handleCheck = () => {
     setCheck(!check)
     changeState()
-    hc(_id, check)
+    hc(id, check)
   }
 
   const getColor = async () => {
-    setColor(await getCategoryColor(categoryId))
+    setColor(await SelectCategoryColor(categoryId))
   }
 
   useEffect(() => {
@@ -87,7 +86,7 @@ const TaskCard = ({ name, checked, _id, index, handleDelete, categoryId, changeS
         ]}
       >
         <Pressable
-          onPress={() => handleDelete(_id)}
+          onPress={() => handleDelete(id)}
         >
           <MaterialCommunityIcons name="delete" size={50} color="white" />
         </Pressable>

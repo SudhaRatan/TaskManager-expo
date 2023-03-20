@@ -35,7 +35,7 @@ const CategoryCard = (props) => {
   const hideOptions = () => setToggle(false)
 
   const getTD = async () => {
-    const res = await getTaskDetails(props._id);
+    const res = await getTaskDetails(props.id);
     if (res.progress) setTotal(res.progress)
     else setTotal(0)
     setChecked(res.checked)
@@ -64,7 +64,7 @@ const CategoryCard = (props) => {
         onLongPress={() => setToggle(true)}
         onPress={() => {
           navigation.navigate('Category', {
-            id: props._id,
+            id:props.id,
             color: props.iconColor,
             name: props.name,
           })

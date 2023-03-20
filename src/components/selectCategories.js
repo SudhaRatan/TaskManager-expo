@@ -9,20 +9,21 @@ import {
 } from "react-native"
 import { Entypo } from '@expo/vector-icons'
 import { useState, useEffect } from "react"
-import { getCategories } from "../db-functions/db"
+// import { getCategories } from "../db-functions/db"
+import { SelectCategories as SC } from "../db-functions/db-sqlite"
 
 const SelectCategories = ({ setCat }) => {
 
   const { width } = Dimensions.get('window')
   const [categories, setCategories] = useState(null)
-  const [catName,setCatname] = useState(null)
+  const [catName, setCatname] = useState(null)
 
   useEffect(() => {
     get();
   }, [])
 
   const get = async () => {
-    const res = await getCategories()
+    const res = await SC()
     if (res.stat) setCategories(res.res)
     else setCategories(null)
   }
@@ -40,12 +41,12 @@ const SelectCategories = ({ setCat }) => {
             }
           ]}
           data={categories}
-          renderItem={({item, index}) => {
+          renderItem={({ item, index }) => {
             return (
               <TouchableOpacity
                 key={index}
                 style={St.iconContainer}
-                onPress={() => setCat(item)}
+                onPress={() => { setCat(item) }}
               >
                 <Text style={{
                   fontSize: 18,
@@ -70,14 +71,14 @@ const St = StyleSheet.create({
   },
   iconContainer: {
     marginVertical: 5,
-    marginHorizontal:2,
+    marginHorizontal: 2,
     elevation: 2,
     backgroundColor: '#F9FAFE',
     paddingVertical: 5,
-    paddingHorizontal:20,
+    paddingHorizontal: 20,
     borderRadius: 10,
-    flexDirection:'row',
-    justifyContent:'space-between',
-    alignItems:'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 })

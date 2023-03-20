@@ -10,12 +10,13 @@ import {
   StyleSheet,
   ToastAndroid,
 } from 'react-native';
-import { insertTask } from '../db-functions/db';
 import { Entypo, Octicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import SelectCategories from '../components/selectCategories';
+
+import { insertTask } from '../db-functions/db-sqlite';
 
 const AddTask = () => {
   const [name, setName] = useState('')
@@ -45,10 +46,10 @@ const AddTask = () => {
     }
   }
 
-  const setCat = ({ _id, name, iconName }) => {
-    setIconName(iconName)
-    setCategoryName(name)
-    setId(_id)
+  const setCat = (item) => {
+    setIconName(item.iconName)
+    setCategoryName(item.name)
+    setId(item.id)
     Animated.spring(iconContScale, {
       toValue: 0,
       useNativeDriver: true
@@ -56,12 +57,20 @@ const AddTask = () => {
     setToggle1(!toggle1)
   }
 
-  const AddTaskFunc = async () => {
-    const res = await insertTask({ name, categoryId: catId, checked: false, Date: Date.now() })
-    if (res.stat) {
-      navigation.navigate('Home')
-    }
-    ToastAndroid.show(res.message, 2000)
+  const AddTaskFunc = () => {
+    if (name !== "") {
+      if (catId !== null) {
+        insertTask(name, catId)
+          .then(({ stat, message }) => {
+            navigation.navigate('Home')
+            ToastAndroid.show(message, 2000)
+          })
+          .catch(err => {
+
+          })
+      } else ToastAndroid.show("Select a category", 1000)
+    } else ToastAndroid.show('Enter task', 1000)
+
   }
 
   return (
