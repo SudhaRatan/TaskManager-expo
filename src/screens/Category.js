@@ -10,9 +10,16 @@ import {
 import { Entypo } from '@expo/vector-icons';
 import CircularProgressBase from 'react-native-circular-progress-indicator';
 import { useRef, useState, useEffect } from 'react';
-import { tt, deleteTask, getTaskDetails, insertTask } from '../db-functions/db';
+// import { getTaskDetails } from '../db-functions/db';
+import { getTaskDetails } from '../db-functions/db-sqlite';
 import TaskCard from '../components/TaskCard';
 import AddTask from '../components/addTaskInp';
+
+import {
+  SelectTasks,
+  deleteTask,
+  insertTask,
+} from '../db-functions/db-sqlite';
 
 const Category = ({ route, navigation }) => {
 
@@ -30,12 +37,17 @@ const Category = ({ route, navigation }) => {
     setChange(!change)
   }
 
-  const getTasks = async () => {
-    tt.find({ categoryId: route.params.id }).sort({ Date: -1 }).exec((err, res) => {
-      if (res.length > 0) setTasks(res)
-      else setTasks(null)
-      setLoadingTasks(false)
-    })
+  const getTasks = () => {
+
+    SelectTasks(route.params.id)
+      .then(res => {
+        setTasks(res)
+        setLoadingTasks(false)
+      })
+      .catch(err => {
+        setTasks(null)
+        setLoadingTasks(false)
+      })
   }
 
   const getTD = async () => {
@@ -49,12 +61,15 @@ const Category = ({ route, navigation }) => {
     getTasks();
   }, [change])
 
-  const handleDelete = async (_id) => {
-    const res = await deleteTask(_id)
-    if (res.stat) {
+  const handleDelete = async (id) => {
+    setTasks(tasks.filter(task => task.id !== id))
+    try {
+      await deleteTask(id)
       getTD()
-      setTasks(tasks.filter(task => task._id !== _id))
-    } else { ToastAndroid("Error occured", 1000) }
+    } catch (error) {
+      console.log(error)
+      ToastAndroid("Error occured", 1000)
+    }
   }
 
   const val = useRef(new Animated.Value(0)).current
@@ -65,12 +80,17 @@ const Category = ({ route, navigation }) => {
   const addButtonHeight = Math.floor(width < height ? height * 0.08 : width * 0.08)
 
   const AddTaskFunc = async () => {
-    setNewTask('')
-    const res = await insertTask({ name: newTask, categoryId: route.params.id, checked: false, Date: Date.now() })
-    if (newTask !== '') {
-      changeState()
-    }
-    ToastAndroid.show(res.message, 2000)
+    if(newTask !== ""){
+      insertTask(newTask, route.params.id)
+        .then(res => {
+          setNewTask('')
+          ToastAndroid.show(res.message, 1000)
+          changeState()
+        })
+        .catch(err => {
+          ToastAndroid.show(res.message, 1000)
+        })
+    }else ToastAndroid.show("Enter a task", 500)
   }
 
   return (
@@ -147,7 +167,7 @@ const Category = ({ route, navigation }) => {
                   {
                     tasks.map((item, index) => {
                       return (
-                        <TaskCard key={item._id} index={index} handleDelete={handleDelete} {...item}
+                        <TaskCard key={item.id} index={index} handleDelete={handleDelete} {...item}
                           change={change}
                           changeState={changeState}
                         />

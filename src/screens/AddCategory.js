@@ -101,7 +101,6 @@ const AddCategory = () => {
             value={name}
             onChangeText={(value) => {
               setName(value)
-              console.log(name)
             }}
           />
           <View style={St.selectCont}>

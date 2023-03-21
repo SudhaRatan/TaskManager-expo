@@ -14,7 +14,6 @@ import TaskCard from '../components/TaskCard';
 import Add from '../components/Add';
 import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator } from 'react-native';
-// import { deleteCategory, deleteTask } from '../db-functions/db';
 import { ToastAndroid } from 'react-native';
 
 import {
@@ -24,16 +23,17 @@ import {
   SelectLatestTasks,
   dropCategories,
   dropTasks,
-  deleteCategory
+  deleteCategory,
+  deleteTask,
 }
   from '../db-functions/db-sqlite'
 
 const Home = ({ navigation }) => {
 
   const delCat = () => {
-    // dropCategories()
-    //   .then(res => console.log(res))
-    //   .catch(err => console.log(err))
+    dropCategories()
+      .then(res => console.log(res))
+      .catch(err => console.log(err))
     dropTasks()
   }
 
@@ -45,7 +45,6 @@ const Home = ({ navigation }) => {
       }
       setLoading(false)
     }).catch(err => {
-      // console.log(err)
       setCategories(null)
       setLoading(false)
     })
@@ -53,12 +52,17 @@ const Home = ({ navigation }) => {
 
   const getTasks = () => {
     // setLoadingTasks(true)
+    // setTasks(null)
     SelectLatestTasks()
       .then(({ stat, res }) => {
+        // console.log(res)
         setTasks(res)
         setLoadingTasks(false)
       })
-      .catch(err => setLoadingTasks(false))
+      .catch(err => {
+        setLoadingTasks(false)
+        setTasks(null)
+      })
   }
 
   const isDrawerOpen = useDrawerStatus() === 'open';
@@ -119,12 +123,15 @@ const Home = ({ navigation }) => {
   const { height, width } = Dimensions.get('window')
   const addButtonHeight = Math.floor(width < height ? height * 0.075 : width * 0.075)
 
-  const handleDelete = async (_id) => {
-    const res = await deleteTask(_id)
-    if (res.stat) {
-      changeState()
-      setTasks(tasks.filter(task => task._id !== _id))
-    } else { ToastAndroid("Error occured", 1000) }
+  const handleDelete = async (id) => {
+    setTasks(tasks.filter(task => task.id !== id))
+    deleteTask(id)
+      .then(() => {
+        changeState()
+      })
+      .catch(() => {
+        ToastAndroid("Error occured", 1000)
+      })
   }
 
   const deleteCategoryById = async (id) => {
@@ -132,8 +139,6 @@ const Home = ({ navigation }) => {
     getCategories();
     getTasks();
   }
-
-
 
   return (
     <View style={{ flex: 1, backgroundColor: '#111E53', height: height, }} >

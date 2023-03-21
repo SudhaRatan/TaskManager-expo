@@ -107,15 +107,15 @@ export const SelectCategories = () => {
             resolve({
               stat: true,
               res: results,
-              len:len
+              len: len
             })
           } else {
-            reject({ stat: false, message:"error in select categories" })
+            reject({ stat: false, message: "error in select categories" })
           }
         },
         err => {
           console.log(err)
-          reject({ stat: false, message:"error in select categories 2" })
+          reject({ stat: false, message: "error in select categories 2" })
         }
       )
     })
@@ -139,25 +139,54 @@ export const SelectCategoryColor = (id) => {
         },
         err => {
           console.log(err)
-          reject({ stat: false, message:"error in select cat color2" })
+          reject({ stat: false, message: "error in select cat color2" })
         }
       )
     })
   })
 }
 
-export const HandleCheck = (id,checked) => {
+export const HandleCheck = (id, checked) => {
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
         `update tasks set checked = ? where id = ? ;`,
-        [!checked,id],
+        [!checked, id],
         (tx, res) => {
-          resolve({stat: true})
+          resolve({ stat: true })
         },
         err => {
           console.log(err)
           reject({ stat: false })
+        }
+      )
+    })
+  })
+}
+
+export const getTaskDetails = (categoryId) => {
+  return new Promise((resolve,reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        `select count(checked) as "check" from tasks where checked = 0 and categoryId = ?;`,
+        [categoryId],
+        (tx,res) => {
+          const unchecked = res.rows.item(0).check
+          tx.executeSql(
+            `select count(checked) as "check" from tasks where checked = 1 and categoryId = ?;`,
+            [categoryId],
+            (tx,res1) => {
+              const checked = res1.rows.item(0).check
+              resolve({
+                progress: checked / (unchecked+checked),
+                checked: checked,
+                unchecked: unchecked
+              })
+            }
+          )
+        },
+        err => {
+          console.log(err)
         }
       )
     })
@@ -195,13 +224,54 @@ export const SelectLatestTasks = () => {
   })
 }
 
+export const SelectTasks = (categoryId) => {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        `select * from tasks where categoryId = ? order by id desc;`,
+        [categoryId],
+        (tx, res) => {
+          let len = res.rows.length
+          if (len > 0) {
+            let result = []
+            for (let i = 0; i < len; i++) {
+              result.push(res.rows.item(i))
+            }
+            resolve(result)
+          }else reject(false)
+        },
+        (err) => {
+          console.log(err)
+          reject(err)
+        }
+      )
+    })
+  })
+}
+
+export const deleteTask = (id) => {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        `delete from tasks where id = ?;`,
+        [id],
+        (tx, res) => { resolve(true) },
+        (err) => {
+          console.log(err)
+          reject(err)
+        }
+      )
+    })
+  })
+}
+
 export const deleteCategory = (id) => {
-  return new Promise((resolve,reject) => {
+  return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
         `delete from categories where id = ?;`,
         [id],
-        (tx,res) => {
+        (tx, res) => {
           tx.executeSql(
             `delete from tasks where categoryId = ?`,
             [id],

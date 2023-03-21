@@ -43,7 +43,8 @@ const TaskCard = ({ name, checked, id, index, handleDelete, categoryId, changeSt
 
   useEffect(() => {
     getColor()
-  }, []);
+    setCheck(checked)
+  }, [checked]);
 
   const leftSwipe = (progress, dragX) => {
     const scale = dragX.interpolate({
