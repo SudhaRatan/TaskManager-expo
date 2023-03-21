@@ -106,15 +106,16 @@ export const SelectCategories = () => {
             }
             resolve({
               stat: true,
-              res: results
+              res: results,
+              len:len
             })
           } else {
-            reject({ stat: false })
+            reject({ stat: false, message:"error in select categories" })
           }
         },
         err => {
           console.log(err)
-          reject({ stat: false })
+          reject({ stat: false, message:"error in select categories 2" })
         }
       )
     })
@@ -130,11 +131,29 @@ export const SelectCategoryColor = (id) => {
         (tx, res) => {
           let len = res.rows.length
           if (len === 1) {
-            // console.log(res.rows.item(0).iconColor)
             resolve(res.rows.item(0).iconColor)
           } else {
-            reject({ stat: false })
+            // reject({ stat: false, message:"error in select cat color" })
+            resolve('#000')
           }
+        },
+        err => {
+          console.log(err)
+          reject({ stat: false, message:"error in select cat color2" })
+        }
+      )
+    })
+  })
+}
+
+export const HandleCheck = (id,checked) => {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        `update tasks set checked = ? where id = ? ;`,
+        [!checked,id],
+        (tx, res) => {
+          resolve({stat: true})
         },
         err => {
           console.log(err)
@@ -144,7 +163,6 @@ export const SelectCategoryColor = (id) => {
     })
   })
 }
-
 
 
 export const SelectLatestTasks = () => {
@@ -173,6 +191,34 @@ export const SelectLatestTasks = () => {
           reject({ stat: false })
         }
       )
+    })
+  })
+}
+
+export const deleteCategory = (id) => {
+  return new Promise((resolve,reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        `delete from categories where id = ?;`,
+        [id],
+        (tx,res) => {
+          tx.executeSql(
+            `delete from tasks where categoryId = ?`,
+            [id],
+            () => {
+              resolve(true)
+            },
+            err => {
+              console.log(err)
+              reject(false)
+            }
+          )
+        },
+        err => {
+          console.log(err)
+          reject(false)
+        }
+      );
     })
   })
 }

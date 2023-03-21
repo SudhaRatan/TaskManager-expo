@@ -83,7 +83,7 @@ const CategoryCard = (props) => {
   )
 }
 
-const Main = ({ _id, name, iconName, iconColor, checked, unchecked, total }) => {
+const Main = ({ id, name, iconName, iconColor, checked, unchecked, total }) => {
   return (
     <MotiView
       from={{ translateX: -20, opacity: 0 }}
@@ -110,7 +110,7 @@ const Main = ({ _id, name, iconName, iconColor, checked, unchecked, total }) => 
   )
 }
 
-const Options = ({ _id, iconColor, hideOptions, deleteCategory }) => {
+const Options = ({ id, iconColor, hideOptions, deleteCategory }) => {
   return (
     <MotiView
       style={St.optionCont}
@@ -124,7 +124,7 @@ const Options = ({ _id, iconColor, hideOptions, deleteCategory }) => {
       <TouchableOpacity style={[St.iconCont, { borderColor: iconColor }]} onPress={hideOptions}>
         <AntDesign name="back" size={38} color={iconColor} />
       </TouchableOpacity>
-      <TouchableOpacity style={[St.iconCont, { borderColor: iconColor }]} onPress={() => deleteCategory(_id)}>
+      <TouchableOpacity style={[St.iconCont, { borderColor: iconColor }]} onPress={() => deleteCategory(id)}>
         <AntDesign name="delete" size={38} color={iconColor} />
       </TouchableOpacity>
     </MotiView>

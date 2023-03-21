@@ -14,6 +14,7 @@ import { AnimatePresence } from 'moti';
 import CheckBox from './checkBox';
 import CheckBox1 from './checkBox1';
 import { handleCheck as hc } from '../db-functions/db';
+import { HandleCheck } from '../db-functions/db-sqlite';
 import Animated, { Layout, SlideInLeft, SlideOutLeft } from 'react-native-reanimated';
 import { SelectCategoryColor } from '../db-functions/db-sqlite';
 
@@ -33,7 +34,7 @@ const TaskCard = ({ name, checked, id, index, handleDelete, categoryId, changeSt
   const handleCheck = () => {
     setCheck(!check)
     changeState()
-    hc(id, check)
+    HandleCheck(id, check)
   }
 
   const getColor = async () => {

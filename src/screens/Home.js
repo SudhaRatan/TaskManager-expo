@@ -14,7 +14,7 @@ import TaskCard from '../components/TaskCard';
 import Add from '../components/Add';
 import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator } from 'react-native';
-import { deleteCategory, deleteTask } from '../db-functions/db';
+// import { deleteCategory, deleteTask } from '../db-functions/db';
 import { ToastAndroid } from 'react-native';
 
 import {
@@ -24,27 +24,29 @@ import {
   SelectLatestTasks,
   dropCategories,
   dropTasks,
+  deleteCategory
 }
   from '../db-functions/db-sqlite'
-
-// SQLite.enablePromise(true)
 
 const Home = ({ navigation }) => {
 
   const delCat = () => {
-    dropCategories()
-      .then(res => console.log(res))
-      .catch(err => console.log(err))
+    // dropCategories()
+    //   .then(res => console.log(res))
+    //   .catch(err => console.log(err))
     dropTasks()
   }
 
   const getCategories = () => {
-    // setLoading(true)
-    SelectCategories().then(({ stat, res }) => {
-      setCategories(res)
+    // setLoading(false)
+    SelectCategories().then(({ stat, res, len }) => {
+      if (len > 0) {
+        setCategories(res)
+      }
       setLoading(false)
     }).catch(err => {
-      console.log(err)
+      // console.log(err)
+      setCategories(null)
       setLoading(false)
     })
   }
@@ -52,8 +54,7 @@ const Home = ({ navigation }) => {
   const getTasks = () => {
     // setLoadingTasks(true)
     SelectLatestTasks()
-      .then(({stat,res}) => {
-        // console.log(res)
+      .then(({ stat, res }) => {
         setTasks(res)
         setLoadingTasks(false)
       })
@@ -128,8 +129,8 @@ const Home = ({ navigation }) => {
 
   const deleteCategoryById = async (id) => {
     await deleteCategory(id)
-    getCategoriesFunc();
-    getLatestTasks();
+    getCategories();
+    getTasks();
   }
 
 
