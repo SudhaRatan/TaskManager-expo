@@ -6,7 +6,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
 
 import Home from '../screens/Home';
 import MyDrawer from '../components/MyDrawer';
